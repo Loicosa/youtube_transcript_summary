@@ -1,0 +1,17 @@
+{
+  "name": "youtube-transcript-popup",
+  "version": "0.5.10",
+  "description": "Chrome extension to retrieve, copy, and download YouTube video transcripts.",
+  "type": "commonjs",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "chrome-extension",
+    "youtube",
+    "transcript",
+    "captions"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YouTube Transcript Retriever</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="popup">
+      <header class="header">
+        <h1>YouTube Transcript</h1>
+        <p id="videoTitle" class="video-title" hidden></p>
+      </header>
+
+      <p id="status" class="status" role="status">Open a YouTube video and click Get Transcript.</p>
+
+      <div class="actions">
+        <button id="getTranscript" class="primary" type="button">Get Transcript</button>
+        <button id="copyTranscript" type="button" disabled>Copy</button>
+        <button id="downloadTranscript" type="button" disabled>Download (txt)</button>
+        <button id="openSummary" type="button" disabled>Summary</button>
+      </div>
+      <button id="openSettings" class="settings-button" type="button">Settings</button>
+
+      <div class="view-switch" role="group" aria-label="Transcript view">
+        <button class="view-button active" type="button" data-view="timed" aria-pressed="true">Timed</button>
+        <button class="view-button" type="button" data-view="text" aria-pressed="false">Text</button>
+      </div>
+
+      <div class="transcript-shell">
+        <div id="timedTranscript" class="timed-list" aria-label="Timestamped transcript"></div>
+        <textarea
+          id="transcriptText"
+          class="transcript"
+          aria-label="Transcript text"
+          readonly
+          hidden
+          placeholder="Transcript text will appear here."
+        ></textarea>
+      </div>
+    </main>
+
+    <script src="settings.js"></script>
+    <script src="transcript.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

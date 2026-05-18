@@ -1,6 +1,7 @@
 const INLINE_ROOT_ID = "yttr-inline-root";
 const INLINE_STYLE_ID = "yttr-inline-style";
 const OPEN_LLM_SUMMARY_MESSAGE = "YTTR_OPEN_LLM_SUMMARY";
+const OPEN_OPTIONS_PAGE_MESSAGE = "YTTR_OPEN_OPTIONS_PAGE";
 const OPEN_BUTTON_LABEL = "Get Transcript";
 const INLINE_PANEL_AUTO_FETCH = true;
 const SUMMARY_PROMPT_PREFIX = "Make a summary of this text:";
@@ -137,20 +138,27 @@ function createInlineTranscriptRoot() {
         </div>
         <button class="yttr-icon-button" type="button" data-action="close" aria-label="Close transcript panel">X</button>
       </div>
-      <div class="yttr-actions">
+      <div class="yttr-primary-actions">
         <button class="yttr-action-button yttr-action-button-primary" type="button" data-action="load">Get Transcript</button>
-        <button class="yttr-action-button" type="button" data-action="copy" disabled>Copy</button>
-        <button class="yttr-action-button" type="button" data-action="download" disabled>Download (txt)</button>
-        <button class="yttr-action-button" type="button" data-action="summary" disabled>Summary</button>
+        <button class="yttr-action-button yttr-action-button-llm" type="button" data-action="summary" disabled>Send to LLM</button>
       </div>
       <div class="yttr-status" data-role="status">Ready.</div>
-      <div class="yttr-view-switch" role="group" aria-label="Transcript view">
-        <button class="yttr-view-button active" type="button" data-view="timed" aria-pressed="true">Timed</button>
-        <button class="yttr-view-button" type="button" data-view="text" aria-pressed="false">Text</button>
+      <div class="yttr-controls-row">
+        <div class="yttr-view-switch" role="group" aria-label="Transcript view">
+          <button class="yttr-view-button active" type="button" data-view="timed" aria-pressed="true">Timed</button>
+          <button class="yttr-view-button" type="button" data-view="text" aria-pressed="false">Text</button>
+        </div>
+        <div class="yttr-actions">
+          <button class="yttr-action-button" type="button" data-action="copy" disabled>Copy</button>
+          <button class="yttr-action-button" type="button" data-action="download" disabled>Download</button>
+        </div>
       </div>
       <div class="yttr-content">
         <div class="yttr-timed-list" data-role="timed-list"></div>
         <textarea class="yttr-text" data-role="text" readonly hidden placeholder="Transcript text will appear here."></textarea>
+      </div>
+      <div class="yttr-panel-footer">
+        <button class="yttr-settings-button" type="button" data-action="settings">Settings</button>
       </div>
     </section>
   `;
@@ -163,6 +171,9 @@ function createInlineTranscriptRoot() {
   });
   root.querySelector('[data-action="close"]').addEventListener("click", () => {
     root.querySelector(".yttr-panel").hidden = true;
+  });
+  root.querySelector('[data-action="settings"]').addEventListener("click", () => {
+    openInlineSettings(root);
   });
   root.querySelector('[data-action="load"]').addEventListener("click", () => {
     loadInlineTranscript(root);
@@ -216,6 +227,17 @@ async function openInlineTranscriptPanel(root) {
   }
 
   setInlineStatus(root, "Click Get Transcript to load captions.");
+}
+
+async function openInlineSettings(root) {
+  try {
+    const response = await sendChromeRuntimeMessage({ type: OPEN_OPTIONS_PAGE_MESSAGE });
+    if (!response || !response.ok) {
+      setInlineStatus(root, "Could not open settings from this page.", "error");
+    }
+  } catch (_error) {
+    setInlineStatus(root, "Could not open settings from this page.", "error");
+  }
 }
 
 async function loadInlineTranscript(root) {
@@ -610,6 +632,7 @@ function injectInlineTranscriptStyles() {
       margin: 0 0 12px;
       font-family: Roboto, Arial, sans-serif;
       color: #f1f1f1;
+      --yttr-button-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 32'%3E%3Crect x='7' y='4' width='25' height='24' rx='6' fill='white'/%3E%3Cpath d='M25 4v8h7' fill='%23dbeafe'/%3E%3Cpath d='M14 14h10M14 19h8' stroke='%2360a5fa' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M18 25v-8l7 4z' fill='%23312ebf'/%3E%3C/svg%3E");
     }
 
     #${INLINE_ROOT_ID} * {
@@ -622,35 +645,36 @@ function injectInlineTranscriptStyles() {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 9px;
+      gap: 10px;
       width: 100%;
-      min-height: 42px;
-      border: 1px solid rgba(96, 165, 250, .45);
-      border-radius: 8px;
-      background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+      min-height: 46px;
+      border: 1px solid rgba(164, 196, 255, .7);
+      border-radius: 10px;
+      background: linear-gradient(180deg, #5969ff 0%, #353ee8 100%);
       color: #fff;
       font-size: 14px;
       font-weight: 800;
       letter-spacing: 0;
-      box-shadow: 0 6px 18px rgba(37, 99, 235, .24), inset 0 1px 0 rgba(255, 255, 255, .18);
+      box-shadow: 0 10px 24px rgba(53, 62, 232, .28), inset 0 1px 0 rgba(255, 255, 255, .28);
       cursor: pointer;
       transition: background .14s ease, border-color .14s ease, box-shadow .14s ease, transform .14s ease;
     }
 
     #${INLINE_ROOT_ID} .yttr-open-button::before {
       content: "";
-      width: 17px;
-      height: 14px;
-      border: 2px solid rgba(255, 255, 255, .92);
-      border-radius: 4px;
-      box-shadow: inset 0 -4px 0 rgba(255, 255, 255, .18);
+      width: 24px;
+      height: 20px;
+      background-image: var(--yttr-button-icon);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
       flex: 0 0 auto;
     }
 
     #${INLINE_ROOT_ID} .yttr-open-button:hover:not(:disabled) {
-      border-color: rgba(147, 197, 253, .78);
-      background: linear-gradient(180deg, #4f8ff8 0%, #1d4ed8 100%);
-      box-shadow: 0 8px 22px rgba(37, 99, 235, .3), inset 0 1px 0 rgba(255, 255, 255, .22);
+      border-color: rgba(219, 234, 254, .88);
+      background: linear-gradient(180deg, #6676ff 0%, #2930d3 100%);
+      box-shadow: 0 12px 28px rgba(53, 62, 232, .36), inset 0 1px 0 rgba(255, 255, 255, .32);
       transform: translateY(-1px);
     }
 
@@ -664,7 +688,7 @@ function injectInlineTranscriptStyles() {
     #${INLINE_ROOT_ID} .yttr-panel {
       position: fixed;
       top: 72px;
-      right: 24px;
+      right: max(44px, env(safe-area-inset-right));
       z-index: 2147483646;
       width: min(420px, calc(100vw - 48px));
       max-height: calc(100vh - 96px);
@@ -706,6 +730,24 @@ function injectInlineTranscriptStyles() {
       white-space: nowrap;
     }
 
+    #${INLINE_ROOT_ID} .yttr-settings-button {
+      min-height: 28px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 999px;
+      background: #272727;
+      color: #dbeafe;
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #${INLINE_ROOT_ID} .yttr-settings-button:hover {
+      border-color: rgba(96, 165, 250, .5);
+      background: #303030;
+      color: #fff;
+    }
+
     #${INLINE_ROOT_ID} .yttr-icon-button {
       width: 30px;
       height: 30px;
@@ -733,8 +775,16 @@ function injectInlineTranscriptStyles() {
       color: #ff8983;
     }
 
+    #${INLINE_ROOT_ID} .yttr-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
     #${INLINE_ROOT_ID} .yttr-view-switch {
       display: inline-flex;
+      flex: 0 0 auto;
       width: fit-content;
       padding: 2px;
       border: 1px solid rgba(255, 255, 255, .14);
@@ -766,6 +816,11 @@ function injectInlineTranscriptStyles() {
       border-radius: 8px;
       background: #0f0f0f;
       overflow: hidden;
+    }
+
+    #${INLINE_ROOT_ID} .yttr-panel-footer {
+      display: flex;
+      justify-content: flex-end;
     }
 
     #${INLINE_ROOT_ID} .yttr-timed-list {
@@ -865,11 +920,20 @@ function injectInlineTranscriptStyles() {
       line-height: 1.5;
     }
 
+    #${INLINE_ROOT_ID} .yttr-primary-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     #${INLINE_ROOT_ID} .yttr-actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      flex: 1 1 auto;
+      flex-wrap: nowrap;
+      gap: 6px;
       align-items: center;
+      justify-content: flex-end;
+      min-width: 0;
     }
 
     #${INLINE_ROOT_ID} .yttr-action-button {
@@ -882,9 +946,35 @@ function injectInlineTranscriptStyles() {
     }
 
     #${INLINE_ROOT_ID} .yttr-action-button-primary {
-      border-color: rgba(96, 165, 250, .55);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-color: rgba(164, 196, 255, .62);
       color: #fff;
-      background: #2563eb;
+      background: linear-gradient(180deg, #5969ff 0%, #353ee8 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22);
+    }
+
+    #${INLINE_ROOT_ID} .yttr-action-button-primary::before {
+      content: "";
+      width: 20px;
+      height: 16px;
+      background-image: var(--yttr-button-icon);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      flex: 0 0 auto;
+    }
+
+    #${INLINE_ROOT_ID} .yttr-action-button-llm {
+      border-color: rgba(45, 212, 191, .46);
+      color: #ecfeff;
+      background: #155e63;
+    }
+
+    #${INLINE_ROOT_ID} .yttr-action-button-llm:hover:not(:disabled) {
+      border-color: rgba(94, 234, 212, .72);
+      background: #0f766e;
     }
 
     #${INLINE_ROOT_ID} .yttr-action-button {
@@ -898,7 +988,7 @@ function injectInlineTranscriptStyles() {
     }
 
     #${INLINE_ROOT_ID} .yttr-action-button.yttr-action-button-primary:hover:not(:disabled) {
-      background: #1d4ed8;
+      background: linear-gradient(180deg, #6676ff 0%, #2930d3 100%);
     }
 
     #${INLINE_ROOT_ID} .yttr-action-button:disabled {
@@ -922,6 +1012,15 @@ function injectInlineTranscriptStyles() {
       #${INLINE_ROOT_ID} .yttr-transcript-row {
         grid-template-columns: 44px minmax(0, 1fr);
         gap: 8px;
+      }
+
+      #${INLINE_ROOT_ID} .yttr-controls-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      #${INLINE_ROOT_ID} .yttr-actions {
+        justify-content: flex-start;
       }
     }
   `;

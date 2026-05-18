@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "YouTube Transcript Retriever",
   "description": "Retrieve, copy, and download the transcript for the current YouTube video.",
-  "version": "0.5.10",
+  "version": "1.0",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",

@@ -7,9 +7,36 @@ test("popup markup exposes summary and timestamped views", () => {
   const html = fs.readFileSync(path.join(__dirname, "..", "popup.html"), "utf8");
 
   assert.match(html, /id="openSummary"/);
+  assert.match(html, />Send to LLM</);
+  assert.match(html, />Download</);
+  assert.doesNotMatch(html, /Download \(txt\)/);
+  assert.match(html, /class="toolbar-row"/);
+  assert.match(html, /class="actions primary-actions"[\s\S]*id="getTranscript"[\s\S]*id="openSummary"/);
+  assert.doesNotMatch(html, /class="actions secondary-actions"[\s\S]*id="openSummary"/);
   assert.match(html, /data-view="timed"/);
   assert.match(html, /data-view="text"/);
   assert.match(html, /id="timedTranscript"/);
+});
+
+test("options intro links to the project repository", () => {
+  const html = fs.readFileSync(path.join(__dirname, "..", "options.html"), "utf8");
+
+  assert.match(html, /https:\/\/github\.com\/Loicosa\/youtube_transcript_summary/);
+  assert.match(html, /target="_blank"/);
+  assert.match(html, /rel="noopener noreferrer"/);
+});
+
+test("in-page transcript panel exposes settings and send-to-llm actions", () => {
+  const source = fs.readFileSync(path.join(__dirname, "..", "content-script.js"), "utf8");
+
+  assert.match(source, /data-action="settings"/);
+  assert.match(source, />Settings</);
+  assert.match(source, /yttr-panel-footer[\s\S]*data-action="settings"/);
+  assert.match(source, /data-action="summary" disabled>Send to LLM</);
+  assert.match(source, /data-action="download" disabled>Download</);
+  assert.match(source, /yttr-primary-actions[\s\S]*data-action="load"[\s\S]*data-action="summary"/);
+  assert.match(source, /yttr-controls-row/);
+  assert.match(source, /openInlineSettings/);
 });
 
 test("popup uses timestamped transcript output by default", () => {

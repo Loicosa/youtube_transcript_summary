@@ -7,6 +7,7 @@ if (typeof module !== "undefined" && module.exports && typeof globalThis.YttrSet
 }
 
 const OPEN_LLM_SUMMARY_MESSAGE = "YTTR_OPEN_LLM_SUMMARY";
+const OPEN_OPTIONS_PAGE_MESSAGE = "YTTR_OPEN_OPTIONS_PAGE";
 const CHATGPT_TAB_LOAD_TIMEOUT_MS = 15000;
 const WELCOME_PAGE_PATH = "options.html?welcome=1";
 const settingsApi = globalThis.YttrSettings;
@@ -20,7 +21,26 @@ const hasChromeRuntime =
 
 if (hasChromeRuntime) {
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-    if (!message || message.type !== OPEN_LLM_SUMMARY_MESSAGE) {
+    if (!message) {
+      return false;
+    }
+
+    if (message.type === OPEN_OPTIONS_PAGE_MESSAGE) {
+      openOptionsPage()
+        .then((opened) => {
+          sendResponse({ ok: opened });
+        })
+        .catch((error) => {
+          sendResponse({
+            ok: false,
+            error: error && error.message ? error.message : "Could not open settings."
+          });
+        });
+
+      return true;
+    }
+
+    if (message.type !== OPEN_LLM_SUMMARY_MESSAGE) {
       return false;
     }
 
@@ -44,6 +64,23 @@ if (hasChromeRuntime) {
       });
     });
   }
+}
+
+async function openOptionsPage(chromeApi = chrome) {
+  if (chromeApi?.runtime?.openOptionsPage) {
+    await callChrome(chromeApi, chromeApi.runtime, chromeApi.runtime.openOptionsPage);
+    return true;
+  }
+
+  if (!chromeApi?.tabs?.create || !chromeApi?.runtime?.getURL) {
+    return false;
+  }
+
+  await callChrome(chromeApi, chromeApi.tabs, chromeApi.tabs.create, {
+    active: true,
+    url: chromeApi.runtime.getURL("options.html")
+  });
+  return true;
 }
 
 async function openWelcomePageOnInstall(details, chromeApi = chrome) {
@@ -419,6 +456,7 @@ if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     fillChatGptComposer,
     fillLlmComposer,
+    openOptionsPage,
     openWelcomePageOnInstall,
     openLlmSummary,
     openChatGptSummary

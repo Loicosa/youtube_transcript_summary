@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const {
   fillChatGptComposer,
   fillLlmComposer,
+  openOptionsPage,
   openWelcomePageOnInstall
 } = require("../background");
 
@@ -276,6 +277,46 @@ test("openWelcomePageOnInstall opens options on first install only", async () =>
     {
       active: true,
       url: "chrome-extension://id/options.html?welcome=1"
+    }
+  ]);
+});
+
+test("openOptionsPage asks Chrome to open the extension options page", async () => {
+  let opened = false;
+  const chromeApi = {
+    runtime: {
+      openOptionsPage(callback) {
+        opened = true;
+        callback();
+      }
+    }
+  };
+
+  assert.equal(await openOptionsPage(chromeApi), true);
+  assert.equal(opened, true);
+});
+
+test("openOptionsPage falls back to creating an options tab", async () => {
+  const createdTabs = [];
+  const chromeApi = {
+    runtime: {
+      getURL(path) {
+        return `chrome-extension://id/${path}`;
+      }
+    },
+    tabs: {
+      create(payload, callback) {
+        createdTabs.push(payload);
+        callback({ id: 7 });
+      }
+    }
+  };
+
+  assert.equal(await openOptionsPage(chromeApi), true);
+  assert.deepEqual(createdTabs, [
+    {
+      active: true,
+      url: "chrome-extension://id/options.html"
     }
   ]);
 });

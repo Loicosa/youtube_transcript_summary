@@ -15,17 +15,21 @@
 
       <p id="status" class="status" role="status">Open a YouTube video and click Get Transcript.</p>
 
-      <div class="actions">
+      <div class="actions primary-actions">
         <button id="getTranscript" class="primary" type="button">Get Transcript</button>
-        <button id="copyTranscript" type="button" disabled>Copy</button>
-        <button id="downloadTranscript" type="button" disabled>Download (txt)</button>
-        <button id="openSummary" type="button" disabled>Summary</button>
+        <button id="openSummary" class="llm-action" type="button" disabled>Send to LLM</button>
       </div>
       <button id="openSettings" class="settings-button" type="button">Settings</button>
 
-      <div class="view-switch" role="group" aria-label="Transcript view">
-        <button class="view-button active" type="button" data-view="timed" aria-pressed="true">Timed</button>
-        <button class="view-button" type="button" data-view="text" aria-pressed="false">Text</button>
+      <div class="toolbar-row">
+        <div class="view-switch" role="group" aria-label="Transcript view">
+          <button class="view-button active" type="button" data-view="timed" aria-pressed="true">Timed</button>
+          <button class="view-button" type="button" data-view="text" aria-pressed="false">Text</button>
+        </div>
+        <div class="actions secondary-actions">
+          <button id="copyTranscript" type="button" disabled>Copy</button>
+          <button id="downloadTranscript" type="button" disabled>Download</button>
+        </div>
       </div>
 
       <div class="transcript-shell">
